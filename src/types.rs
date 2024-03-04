@@ -2,6 +2,7 @@ use bytemuck::from_bytes;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::{error, info};
+use num_enum::TryFromPrimitive;
 
 use crate::{utils, HEADER_SIZE};
 
@@ -70,7 +71,8 @@ impl Default for Header {
     }
 }
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, Default, TryFromPrimitive)]
+#[num_enum(error_type(name = IntoErrors, constructor = IntoErrors::NoSuchVariant))]
 #[repr(u8)]
 #[serde(rename_all = "lowercase")]
 pub enum CompressionType {
@@ -96,38 +98,13 @@ pub enum IntoErrors {
     BufferTooSmall,
 }
 
-impl TryInto<CompressionType> for u8 {
-    type Error = IntoErrors;
-
-    fn try_into(self) -> Result<CompressionType, Self::Error> {
-        match self {
-            0 => Ok(CompressionType::None),
-            1 => Ok(CompressionType::Zstd),
-            2 => Ok(CompressionType::ZstdFast),
-            3 => Ok(CompressionType::ZstdSlow),
-            4 => Ok(CompressionType::Gzip),
-            n => Err(IntoErrors::NoSuchVariant(n)),
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, Default, TryFromPrimitive)]
+#[num_enum(error_type(name = IntoErrors, constructor = IntoErrors::NoSuchVariant))]
 #[repr(u8)]
 #[serde(rename_all = "lowercase")]
 pub enum EncryptionType {
     #[default]
     None = 0,
-}
-
-impl TryInto<EncryptionType> for u8 {
-    type Error = IntoErrors;
-
-    fn try_into(self) -> Result<EncryptionType, Self::Error> {
-        match self {
-            0 => Ok(EncryptionType::None),
-            n => Err(IntoErrors::NoSuchVariant(n)),
-        }
-    }
 }
 
 pub struct PostCommand {
