@@ -54,34 +54,33 @@ pub struct InterfaceSection {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CharPeerSection {
+pub struct CommonOptions {
     pub path: String,
     pub allowedips: Vec<IpNetwork>,
-    pub speed: Option<u32>,
     #[serde(default)]
     pub compression: Option<CompressionType>,
     #[serde(default)]
     pub encryption: Option<EncryptionType>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CharPeerSection {
+    #[serde(flatten)]
+    pub common: CommonOptions,
+
+    pub speed: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SockPeerSection {
-    pub path: String,
-    pub allowedips: Vec<IpNetwork>,
-    #[serde(default)]
-    pub compression: Option<CompressionType>,
-    #[serde(default)]
-    pub encryption: Option<EncryptionType>,
+    #[serde(flatten)]
+    pub common: CommonOptions,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SockListenPeerSection {
-    pub path: String,
-    pub allowedips: Vec<IpNetwork>,
-    #[serde(default)]
-    pub compression: Option<CompressionType>,
-    #[serde(default)]
-    pub encryption: Option<EncryptionType>,
+    #[serde(flatten)]
+    pub common: CommonOptions,
 }
 
 #[derive(Debug, Clone)]
@@ -94,25 +93,25 @@ pub enum Peer {
 impl Peer {
     pub fn allowed_ips(&self) -> &[IpNetwork] {
         match self {
-            Peer::Char(c) => &c.allowedips[..],
-            Peer::Sock(c) => &c.allowedips[..],
-            Peer::SockListen(c) => &c.allowedips[..],
+            Peer::Char(c) => &c.common.allowedips[..],
+            Peer::Sock(c) => &c.common.allowedips[..],
+            Peer::SockListen(c) => &c.common.allowedips[..],
         }
     }
 
     pub fn path(&self) -> &str {
         match self {
-            Peer::Char(c) => &c.path,
-            Peer::Sock(c) => &c.path,
-            Peer::SockListen(c) => &c.path,
+            Peer::Char(c) => &c.common.path,
+            Peer::Sock(c) => &c.common.path,
+            Peer::SockListen(c) => &c.common.path,
         }
     }
 
     pub fn compression(&self) -> CompressionType {
         match self {
-            Peer::Char(c) => c.compression.unwrap_or(CompressionType::None),
-            Peer::Sock(c) => c.compression.unwrap_or(CompressionType::None),
-            Peer::SockListen(c) => c.compression.unwrap_or(CompressionType::None),
+            Peer::Char(c) => c.common.compression.unwrap_or(CompressionType::None),
+            Peer::Sock(c) => c.common.compression.unwrap_or(CompressionType::None),
+            Peer::SockListen(c) => c.common.compression.unwrap_or(CompressionType::None),
         }
     }
 }

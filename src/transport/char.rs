@@ -14,8 +14,8 @@ pub async fn connect_serial(
     mspc_tx: mpsc::Sender<Bytes>,
 ) -> anyhow::Result<()> {
     let mut port =
-        tokio_serial::new(&peer.path, peer.speed.unwrap_or(115200)).open_native_async()?;
-    info!("Connected to {}.", &peer.path);
+        tokio_serial::new(&peer.common.path, peer.speed.unwrap_or(115200)).open_native_async()?;
+    info!("Connected to {}.", &peer.common.path);
     port.clear(ClearBuffer::All)?;
     port.flush().await?;
 
