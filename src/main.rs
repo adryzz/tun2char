@@ -10,6 +10,7 @@ mod utils;
 use crate::config::parse_config;
 use crate::packet_handling::{handle_packet_from_kernel, prep_packet_for_kernel};
 use crate::transport::char::connect_serial;
+use crate::transport::midi::connect_midi;
 use crate::transport::sock::{connect_sock, connect_sock_listen};
 use bytes::Bytes;
 use config::Peer;
@@ -92,6 +93,7 @@ async fn connect_to_peer(
         Peer::Char(c) => connect_serial(c, broadcast_rx, mspc_tx).await,
         Peer::Sock(s) => connect_sock(s, broadcast_rx, mspc_tx).await,
         Peer::SockListen(s) => connect_sock_listen(s, broadcast_rx, mspc_tx).await,
+        Peer::Midi(s) => connect_midi(s, broadcast_rx, mspc_tx).await,
     };
 
     match res {
